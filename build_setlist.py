@@ -1,12 +1,8 @@
 # build_setlist.py
+import os
 from songs import SONGS
 
-# 1) Define your setlist order here or load from a text file
-SETLIST = [
-    "Where",
-    "A Night Like This",
-    # etc...
-]
+SETLIST_FILE = "setlist.txt"
 
 HTML_TEMPLATE = """<!doctype html>
 <html>
@@ -91,31 +87,56 @@ HTML_TEMPLATE = """<!doctype html>
 </html>
 """
 
-def build_song_section(song: "Song") -> str:
+def read_setlist(filename: str):
+    """Reads a plain text setlist file, one title per line."""
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"Setlist file not found: {filename}")
+
+    titles = []
+    with open(filename, "r", encoding="utf-8") as f:
+        for line in f:
+            title = line.strip()
+            if title:
+                titles.append(title)
+
+    return titles
+
+
+def build_song_section(song):
     return f"""
 <section class="song">
   <h1 class="title">{song.title}</h1>
-  <div class="notes">
-    {song.notes_html}
-  </div>
-  <div class="lyrics">
-    {song.lyrics_html}
-  </div>
+  <div class="notes">{song.notes_html}</div>
+  <div class="lyrics">{song.lyrics_html}</div>
 </section>
 """.strip()
+
 
 def build_html(setlist_titles):
     sections = []
     for title in setlist_titles:
         if title not in SONGS:
-            raise ValueError(f"Song not found in library: {title}")
+            available = ", ".join(SONGS.keys())
+            raise ValueError(
+                f"Song not found in library: '{title}'.\n"
+                f"Check spelling.\n\nAvailable titles:\n{available}"
+            )
         sections.append(build_song_section(SONGS[title]))
+
     body = "\n\n".join(sections)
     return HTML_TEMPLATE.format(body=body)
 
+
 if __name__ == "__main__":
-    html = build_html(SETLIST)
+    # Load titles from setlist.txt
+    titles = read_setlist(SETLIST_FILE)
+
+    # Build HTML
+    html = build_html(titles)
+
+    # Write output
     output_file = "setlist.html"
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html)
+
     print(f"Wrote {output_file}. Open it in a browser and print to PDF.")
