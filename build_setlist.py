@@ -1,9 +1,14 @@
 # build_setlist.py
 import os
 from datetime import date
+import difflib          # ← add this
 from songs import SONGS
 
 SETLIST_FILE = os.path.join("input", "setlist.txt")
+
+# Case-insensitive map: lowercase name → canonical name
+SONGS_LOWER = {name.lower(): name for name in SONGS.keys()}
+
 
 
 HTML_TEMPLATE = """<!doctype html>
@@ -85,29 +90,57 @@ def read_setlist(filename: str):
 
 def resolve_titles_with_user(titles):
     """
-    For any title that doesn't exist in SONGS,
-    prompt the user to select the correct one from an
-    alphabetized, numbered list. Then update the setlist file.
+    Resolve titles from setlist.txt against SONGS.
+
+    - Case-insensitive match first.
+    - If no match, show fuzzy suggestions (using difflib),
+      plus a full alphabetized list of songs with numbers.
+    - User must type a number; nothing is auto-accepted.
+    - If any changes were made, setlist.txt is rewritten
+      with canonical song titles.
     """
     all_song_names = sorted(SONGS.keys())
+    index_by_name = {name: idx + 1 for idx, name in enumerate(all_song_names)}
     resolved = []
     changed = False
 
     for original in titles:
-        if original in SONGS:
-            resolved.append(original)
+        stripped = original.strip()
+        lower = stripped.lower()
+
+        # 1) Case-insensitive direct match
+        if lower in SONGS_LOWER:
+            canonical = SONGS_LOWER[lower]
+            resolved.append(canonical)
             continue
 
-        # Prompt user for this unknown song
-        print(f"\nSong not found in library: '{original}'")
-        print("Please choose from the list below:")
+        # 2) No direct match: fuzzy suggestions
 
+        print("\nAll songs:")
         for idx, name in enumerate(all_song_names, start=1):
             print(f"  {idx}. {name}")
+        print(f"\nSong not found in library: '{original}'")
 
+        close_lower = difflib.get_close_matches(
+            lower,
+            list(SONGS_LOWER.keys()),
+            n=5,
+            cutoff=0.6,
+        )
+        suggestion_names = [SONGS_LOWER[l] for l in close_lower]
+
+        if suggestion_names:
+            print("Close matches (suggested numbers):")
+            for name in suggestion_names:
+                num = index_by_name[name]
+                print(f"  {num}. {name}")
+        else:
+            print("No close matches found.")
+
+        # 3) Let user choose a number or skip
         while True:
             choice = input(
-                f"Type the number that corresponds to this {original} "
+                "Type the NUMBER that corresponds to this song "
             ).strip()
 
             if not choice.isdigit():
@@ -116,17 +149,17 @@ def resolve_titles_with_user(titles):
 
             n = int(choice)
             if 1 <= n <= len(all_song_names):
-                selected = all_song_names[n - 1]
-                print(f"Using '{selected}' for '{original}'.")
-                resolved.append(selected)
+                canonical = all_song_names[n - 1]
+                print(f"Using '{canonical}' for '{original}'.")
+                resolved.append(canonical)
                 changed = True
                 break
             else:
                 print(f"Please enter a number between 1 and {len(all_song_names)}.")
 
-    # If we made any substitutions, update setlist.txt
+    # 4) If we changed anything, rewrite the setlist file with canonical names
     if changed:
-        print("\nUpdating setlist.txt with your choices...")
+        print("\nUpdating setlist file with your choices...")
         with open(SETLIST_FILE, "w", encoding="utf-8") as f:
             for t in resolved:
                 f.write(t + "\n")

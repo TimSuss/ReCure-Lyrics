@@ -16,13 +16,7 @@ SONGS = {
         notes_html="",
         lyrics_html="""
         <p>Alone u4b2 - This..(2)fire/ash/stars..cold/afraid/gho.../dreams.. STOPS/change/same/eyes/boy/dream..Where/Broken/end</p>
-        """,
-    ),
-    "Where": Song(
-        title="Where",
-        notes_html="",
-        lyrics_html="""
-        <p>Where (  break x4) where/broken (Guitar - e3)</p>
+        <p>Where (  break x4) where/broken (Guitar - e3)</p
         """,
     ),
     "A Night Like This": Song(
@@ -147,7 +141,7 @@ SONGS = {
         <p>Why, why, why…Feel you pulling..JUST</p>
         """,
     ),
-    "The Kiss": Song(
+    "Kiss": Song(
         title="The Kiss",
         notes_html="",
         lyrics_html="""
@@ -178,14 +172,14 @@ SONGS = {
         <p>Drearily..tired</p>
         """,
     ),
-    "The Walk": Song(
+    "Walk": Song(
         title="The Walk",
         notes_html="",
         lyrics_html="""
         <p>Walk Called you//walked..lake***Visiting…kissed you</p>
         """,
     ),
-    "The Hanging Garden": Song(
+    "Hanging Garden": Song(
         title="The Hanging Garden",
         notes_html="",
         lyrics_html="""
@@ -200,7 +194,7 @@ SONGS = {
         """,
         use_full=True
     ),
-    "A Letter To Elise": Song(
+    "Letter To Elise": Song(
         title="A Letter To Elise",
         notes_html="",
         lyrics_html="""
@@ -210,18 +204,17 @@ SONGS = {
         <p>Yesterday..stood..wide….lookedback….tears.</p>
         """,
     ),
-    "The Caterpillar": Song(
-        title="The Caterpillar",
-        notes_html="",
+    "Caterpillar": Song(
+        title="Caterpillar",
+        notes_html="<p>U2B1</p>",
         lyrics_html="""
-        <p>The Caterpillar - U2B1</p>
+        
         """,
     ),
     "Hot Hot Hot": Song(
         title="Hot Hot Hot",
-        notes_html="",
+        notes_html="<p>U1B4</p>",
         lyrics_html="""
-        <p>Hot, hot, hot - U1B4</p>
         """,
     ),
     "Never Enough": Song(
@@ -278,11 +271,11 @@ SONGS = {
         <p>***Very first ***So the fall came, 13 yrs..Air no longer</p>
         """,
     ),
-    "The Lovecats": Song(
-        title="The Lovecats",
+    "Lovecats": Song(
+        title="Lovecats",
         notes_html="",
         lyrics_html="""
-        <p>The Lovecats - U1B4</p>
+        <p>Lovecats - U1B4</p>
         """,
     ),
     "Just Like Heaven": Song(
@@ -382,8 +375,8 @@ SONGS = {
         <p>Headfalls//sky.impossible/hung/impression</p>
         """,
     ),
-    "The Perfect Girl": Song(
-        title="The Perfect Girl",
+    "Perfect Girl": Song(
+        title="Perfect Girl",
         notes_html="",
         lyrics_full_html="""<body class="c6 doc-content"><p class="c3"><span class="c1 c2">I don’t play anything</span></p><p class="c3 c5"><span class="c0"></span></p><p class="c3"><span class="c0">8x riff </span></p><p class="c3"><span class="c0">8x riff</span></p><p class="c3 c5"><span class="c0"></span></p><p class="c3"><span class="c0">8x guitar</span></p><p class="c3"><span class="c0">8x guitar</span></p><p class="c3 c5"><span class="c0"></span></p><p class="c3"><span class="c0">8x guitar variation</span></p><p class="c3 c5"><span class="c2 c1"></span></p><p class="c3"><span class="c2 c1">VERSES</span></p><p class="c3"><span>I'm </span><span class="c1">so </span><span class="c0">glad you came</span></p><p class="c3"><span class="c0">I'm so glad you remembered</span></p><p class="c3 c7"><span class="c0">1,3 &lt;To see how we're ending our last dance together&gt;</span></p><p class="c3 c7"><span class="c0">2 &lt;The walking through walls in the heart of December&gt;</span></p><p class="c3"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&lt; Ex</span><span class="c1">pec</span><span>tant… but too </span><span class="c1">pun</span><span class="c0">ctual &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;but prettier than ever&gt;</span></p><p class="c3 c7"><span>2&lt;The </span><span class="c1">blind</span><span>ness of.. </span><span class="c1">Happ</span><span class="c0">iness; Of falling down laughing&gt;</span></p><p class="c3"><span class="c0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&lt;Reluctantly, cautiously&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; but prettier than ever&gt;</span></p><p class="c3"><span class="c0">I really believed that this time it's forever</span></p><p class="c3 c5"><span class="c0"></span></p><p class="c3 c5"><span class="c0"></span></p><p class="c3"><span class="c2 c1">CHORUS1</span></p><p class="c3 c5"><span class="c0"></span></p><p class="c3"><span>But </span><span class="c1">older </span><span>than me now, more </span><span class="c1">cons</span><span>tant, more </span><span class="c2 c1">real</span></p><p class="c3"><span>And the </span><span class="c1">fur </span><span>and the </span><span class="c1">mouth </span><span class="c0">and the innocence</span></p><p class="c3"><span class="c0">Turned to hair and contentment that ^hangs in a basement</span></p><p class="c3"><span class="c0">A woman now standing where once there was only a girl</span></p><p class="c3"><span class="c0">8x Instr</span></p><p class="c3 c5"><span class="c0"></span></p><p class="c3"><span class="c1">CHORUS2</span></p><p class="c3"><span class="c0">But Christmas falls late now, flatter and colder</span></p><p class="c3"><span>And </span><span class="c1">nev</span><span>er as bright as when </span><span class="c1">we.</span><span class="c4">&nbsp;</span><span class="c0">used. to. fall</span></p><p class="c3"><span>All </span><span class="c1">this </span><span class="c0">in an instant.. be^fore I can kiss you</span></p><p class="c3"><span class="c0">A woman now standing where once there was only a girl</span></p><p class="c3"><span class="c0">8x Instr</span></p><p class="c3 c5"><span class="c0"></span></p><p class="c3"><span class="c1">CHORUS3</span></p><p class="c3"><span class="c0">But Christmas falls late now, flatter and colder</span></p><p class="c3"><span>And </span><span class="c1">nev</span><span>er as bright as when </span><span class="c1">we.</span><span class="c4">&nbsp;</span><span class="c0">used. to. fall</span></p><p class="c3"><span class="c0">And even if we drink I don't think we would kiss</span></p><p class="c3"><span class="c0">In the way that we did when the woman was only a girl</span></p><p class="c3 c5"><span class="c0"></span></p></body>""",
         use_full=True,
