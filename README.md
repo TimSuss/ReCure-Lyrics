@@ -1,0 +1,1 @@
+I am in a tribute banch to The Cure. This takes raw text files containing our setlists and builds an html file with a stage ready setlist that includes all of my cues and reminders and sometimes full lyrics. The html will be converted to a pdf and leveraged for another project--a custom teleprompter for the stage.
