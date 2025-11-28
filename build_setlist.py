@@ -5,6 +5,11 @@ from songs import SONGS
 
 SETLIST_FILE = "setlist.txt"
 
+# >>> SET THIS <<<
+# False = shorthand teleprompter lyrics
+# True  = full DOCX lyrics
+USE_FULL_LYRICS = True
+
 HTML_TEMPLATE = """<!doctype html>
 <html>
 <head>
@@ -21,7 +26,7 @@ HTML_TEMPLATE = """<!doctype html>
   }}
 
   .song {{
-    margin-bottom: 1.5em;  /* visual separation only, no page break */
+    margin-bottom: 1.5em;
   }}
 
   h1.title {{
@@ -40,37 +45,6 @@ HTML_TEMPLATE = """<!doctype html>
     font-size: 18pt;
   }}
 
-  .highlight {{
-    font-weight: 700;
-    color: #c00000;
-  }}
-
-  .cue {{
-    font-style: italic;
-    color: #0066cc;
-  }}
-
-  .note {{
-    font-size: 80%;
-    color: #777;
-  }}
-
-  .section-label {{
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 70%;
-    color: #444;
-  }}
-
-  .marker-yellow {{
-    background: #fff2a8;
-  }}
-
-  .marker-green {{
-    background: #c6f6c6;
-  }}
-
   p {{
     margin: 0 0 0.2em 0;
   }}
@@ -83,26 +57,28 @@ HTML_TEMPLATE = """<!doctype html>
 """
 
 def read_setlist(filename: str):
-    """Reads a plain text setlist file, one title per line."""
     if not os.path.exists(filename):
         raise FileNotFoundError(f"Setlist file not found: {filename}")
-
     titles = []
     with open(filename, "r", encoding="utf-8") as f:
         for line in f:
-            title = line.strip()
-            if title:
-                titles.append(title)
-
+            t = line.strip()
+            if t:
+                titles.append(t)
     return titles
 
-
 def build_song_section(song):
+    # Per-song override wins
+    if song.use_full and song.lyrics_full_html.strip():
+        lyrics = song.lyrics_full_html
+    else:
+        lyrics = song.lyrics_html
+
     return f"""
 <div class="song">
   <h1 class="title">{song.title}</h1>
   <div class="notes">{song.notes_html}</div>
-  <div class="lyrics">{song.lyrics_html}</div>
+  <div class="lyrics">{lyrics}</div>
 </div>
 """.strip()
 
@@ -111,34 +87,18 @@ def build_html(setlist_titles):
     sections = []
     for title in setlist_titles:
         if title not in SONGS:
-            available = ", ".join(SONGS.keys())
-            raise ValueError(
-                f"Song not found in library: '{title}'.\n"
-                f"Check spelling.\n\nAvailable titles:\n{available}"
-            )
+            raise ValueError(f"Song not found: {title}")
         sections.append(build_song_section(SONGS[title]))
+    return HTML_TEMPLATE.format(body="\n\n".join(sections))
 
-    body = "\n\n".join(sections)
-    return HTML_TEMPLATE.format(body=body)
-
-
-def make_output_filename(prefix: str = "setlist") -> str:
-    """Create a dated output filename, avoiding overwrites.
-
-    Examples:
-      setlist_2025-11-28.html
-      setlist_2025-11-28_2.html
-      setlist_2025-11-28_3.html
-    """
-    today_str = date.today().strftime("%Y-%m-%d")
-    base = f"{prefix}_{today_str}"
+def make_output_filename(prefix="setlist"):
+    today = date.today().strftime("%Y-%m-%d")
+    base = f"{prefix}_{today}"
     filename = f"{base}.html"
-
     counter = 2
     while os.path.exists(filename):
         filename = f"{base}_{counter}.html"
         counter += 1
-
     return filename
 
 
@@ -155,6 +115,4 @@ if __name__ == "__main__":
     # 4) Write output
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html)
-
-    print(f"Wrote {output_file}. Open it in a browser and print to PDF.")
-    print("Tip: disable headers/footers in the browser print dialog for a clean teleprompter view.")
+    print(f"Created {output_file}")
