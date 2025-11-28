@@ -107,13 +107,8 @@ def resolve_titles_with_user(titles):
 
         while True:
             choice = input(
-                "Type the number that corresponds to this song "
-                "(or press Enter to skip this song): "
+                f"Type the number that corresponds to this {original} "
             ).strip()
-
-            if choice == "":
-                print(f"Skipping '{original}'. It will be omitted from this setlist.")
-                break
 
             if not choice.isdigit():
                 print("Please type a valid number.")
