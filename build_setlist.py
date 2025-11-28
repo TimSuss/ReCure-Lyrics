@@ -1,5 +1,6 @@
 # build_setlist.py
 import os
+from datetime import date
 from songs import SONGS
 
 SETLIST_FILE = "setlist.txt"
@@ -8,23 +9,19 @@ HTML_TEMPLATE = """<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>Teleprompter Setlist</title>
 <style>
-  @page {{
-    size: A4;
-    margin: 15mm;
-  }}
-
   body {{
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 18pt;
     line-height: 1.4;
     color: #000;
     background: #ffffff;
+    margin: 0;
+    padding: 16px;
   }}
 
   .song {{
-    page-break-after: always;
+    margin-bottom: 1.5em;  /* visual separation only, no page break */
   }}
 
   h1.title {{
@@ -36,22 +33,21 @@ HTML_TEMPLATE = """<!doctype html>
   .notes {{
     font-size: 12pt;
     color: #555;
-    margin-bottom: 0.8em;
+    margin-bottom: 0.4em;
   }}
 
   .lyrics {{
     font-size: 18pt;
   }}
 
-  /* Utility styles for intra-line emphasis */
   .highlight {{
     font-weight: 700;
-    color: #c00000; /* strong red */
+    color: #c00000;
   }}
 
   .cue {{
     font-style: italic;
-    color: #0066cc; /* blue cue text */
+    color: #0066cc;
   }}
 
   .note {{
@@ -67,7 +63,6 @@ HTML_TEMPLATE = """<!doctype html>
     color: #444;
   }}
 
-  /* Optional: fake "marker" vibe for quick visual anchors */
   .marker-yellow {{
     background: #fff2a8;
   }}
@@ -104,11 +99,11 @@ def read_setlist(filename: str):
 
 def build_song_section(song):
     return f"""
-<section class="song">
+<div class="song">
   <h1 class="title">{song.title}</h1>
   <div class="notes">{song.notes_html}</div>
   <div class="lyrics">{song.lyrics_html}</div>
-</section>
+</div>
 """.strip()
 
 
@@ -127,16 +122,39 @@ def build_html(setlist_titles):
     return HTML_TEMPLATE.format(body=body)
 
 
+def make_output_filename(prefix: str = "setlist") -> str:
+    """Create a dated output filename, avoiding overwrites.
+
+    Examples:
+      setlist_2025-11-28.html
+      setlist_2025-11-28_2.html
+      setlist_2025-11-28_3.html
+    """
+    today_str = date.today().strftime("%Y-%m-%d")
+    base = f"{prefix}_{today_str}"
+    filename = f"{base}.html"
+
+    counter = 2
+    while os.path.exists(filename):
+        filename = f"{base}_{counter}.html"
+        counter += 1
+
+    return filename
+
+
 if __name__ == "__main__":
-    # Load titles from setlist.txt
+    # 1) Load titles from setlist.txt
     titles = read_setlist(SETLIST_FILE)
 
-    # Build HTML
+    # 2) Build HTML
     html = build_html(titles)
 
-    # Write output
-    output_file = "setlist.html"
+    # 3) Choose a non-clobbering output filename with today's date
+    output_file = make_output_filename()
+
+    # 4) Write output
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html)
 
     print(f"Wrote {output_file}. Open it in a browser and print to PDF.")
+    print("Tip: disable headers/footers in the browser print dialog for a clean teleprompter view.")

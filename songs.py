@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 
-
 @dataclass
 class Song:
     title: str
     notes_html: str
     lyrics_html: str
+    # Optional: full chart/lyrics, as richer HTML (can be empty)
+    lyrics_full_html: str = ""
 
 
 SONGS = {
@@ -97,6 +98,17 @@ SONGS = {
         lyrics_html="""
         <p>***Like Cockatoos - U2B4</p>
         """,
+        lyrics_full_html="""
+        <p>2x main chords - no guitar</p>
+        <p>4x main chords - little guitar, 12 and 13th on the high E</p>
+
+        <p>She walked out of her house And looked around<br>
+        At all the gardens that looked..Back at her house<br>
+        (Like all the faces that quiz when you smile)</p>
+
+        <p>And he was standing, At the corner<br>
+        Where the road /turned dark<br>
+        """,
     ),
     "Mint Car": Song(
         title="Mint Car",
@@ -132,6 +144,14 @@ SONGS = {
         <p>I wish I could just..***How much more?</p>
         <p>Why, why, why…Feel you pulling..JUST</p>
         """,
+    ),
+    "Homesick": Song(
+    title="Homesick",
+    notes_html="(leave existing)",
+    lyrics_html="(your shorthand)",
+    lyrics_full_html="""
+        <html><head><meta content="text/html; charset=UTF-8" http-equiv="content-type"><style type="text/css">ol{margin:0;padding:0}table td,table th{padding:0}.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}.c0{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:left;height:11pt}.c2{color:#000000;font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}.c3{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:left}.c6{color:#000000;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}.c1{text-decoration-skip-ink:none;-webkit-text-decoration-skip:none;font-weight:700;text-decoration:underline}.c5{background-color:#ffffff;max-width:468pt;padding:72pt 72pt 72pt 72pt}.title{padding-top:0pt;color:#000000;font-size:26pt;padding-bottom:3pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}.subtitle{padding-top:0pt;color:#666666;font-size:15pt;padding-bottom:16pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}li{color:#000000;font-size:11pt;font-family:"Arial"}p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}h1{padding-top:20pt;color:#000000;font-size:20pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h3{padding-top:16pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h4{padding-top:14pt;color:#666666;font-size:12pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h5{padding-top:12pt;color:#666666;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h6{padding-top:12pt;color:#666666;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;font-style:italic;orphans:2;widows:2;text-align:left}</style></head><body class="c5 doc-content"><p class="c3"><span class="c1 c6">I have acoustic - Am7, G6, Dm9</span></p><p class="c0"><span class="c2"></span></p><p class="c3"><span class="c2">Progression x8</span></p><p class="c3"><span class="c2">Progression + Drums x4</span></p><p class="c3"><span class="c2">Progression + Drums + Guitar x4</span></p><p class="c3"><span class="c2">Progression + Drums + Guitar + Bass x4</span></p><p class="c0"><span class="c2"></span></p><p class="c3"><span class="c2">(3)Hey hey, </span></p><p class="c3"><span class="c2">(1.5)just one more and _ I&#39;ll walk away</span></p><p class="c3"><span>All the e</span><span class="c1">very</span><span>thing you win turns to </span><span class="c1">noth</span><span class="c2">ing today</span></p><p class="c3"><span class="c2">And I forget how to move when my mouth is this dry</span></p><p class="c3"><span>And my </span><span class="c1">eyes</span><span>&nbsp;are bursting hearts in a </span><span class="c1">blood</span><span class="c2">-stained sky</span></p><p class="c3"><span class="c2">Oh, it was sweet, it was wild, and oh how we</span></p><p class="c3"><span>I </span><span class="c1">tremb</span><span class="c2">led, stuck in honey</span></p><p class="c3"><span class="c2">Honey, (2/5)cling to me</span></p><p class="c3"><span class="c2">So just one more</span></p><p class="c3"><span>Just </span><span class="c1">one</span><span class="c2">&nbsp;more go</span></p><p class="c3"><span>Ins</span><span class="c1">pire</span><span class="c2">&nbsp;in me the desire in me </span></p><p class="c3"><span>to (2)</span><span class="c1">never </span><span class="c2">go home</span></p><p class="c3"><span class="c2">(second-ish beat of fourth chord&hellip; listen more)</span></p><p class="c3"><span class="c2">Doo doo doo doo doo doo doo doo</span></p><p class="c3"><span class="c2">Doo doo doo doo doo doo</span></p><p class="c0"><span class="c2"></span></p><p class="c3"><span class="c2">Oh, just one more and I&#39;ll walk away</span></p><p class="c3"><span class="c2">All the everything you win turns to nothing today</span></p><p class="c3"><span class="c2">So (1.5)just one more</span></p><p class="c3"><span class="c2">Just (1.5)one more go</span></p><p class="c3"><span>In</span><span class="c1">spire</span><span class="c2">&nbsp;in me the desire in me to (3)never go home</span></p><p class="c3"><span class="c2">&hellip;.To never go home</span></p><p class="c3"><span class="c2">Doo doo doo doo doo doo doo doo</span></p><p class="c0"><span class="c2"></span></p><p class="c3"><span class="c2">Progression x4</span></p><p class="c3"><span>Progression x4 violin and drop out at the end</span></p><p class="c0"><span class="c2"></span></p></body></html>
+    """,
     ),
     "The Kiss": Song(
         title="The Kiss",
