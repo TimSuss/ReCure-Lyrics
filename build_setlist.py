@@ -3,7 +3,7 @@ import os
 from datetime import date
 from songs import SONGS
 
-SETLIST_FILE = "setlist.txt"
+SETLIST_FILE = os.path.join("input", "setlist.txt")
 
 
 HTML_TEMPLATE = """<!doctype html>
@@ -173,14 +173,20 @@ def build_html(setlist_titles):
 
 
 def make_output_filename(prefix: str = "setlist") -> str:
-    """Create a dated output filename, avoiding overwrites."""
+    """Create a dated output filename inside ./output/, avoiding overwrites."""
     today_str = date.today().strftime("%Y-%m-%d")
-    base = f"{prefix}_{today_str}"
-    filename = f"{base}.html"
+    base_name = f"{prefix}_{today_str}.html"
 
+    # ensure output directory exists
+    os.makedirs("output", exist_ok=True)
+
+    # try first version
+    filename = os.path.join("output", base_name)
+
+    # if it already exists, append _2, _3, etc.
     counter = 2
     while os.path.exists(filename):
-        filename = f"{base}_{counter}.html"
+        filename = os.path.join("output", f"{prefix}_{today_str}_{counter}.html")
         counter += 1
 
     return filename
