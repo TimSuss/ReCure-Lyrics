@@ -90,9 +90,9 @@ SONGS = {
     ),
     "Like Cockatoos": Song(
         title="Like Cockatoos",
-        notes_html="",
+        notes_html="U2B4",
         lyrics_html="""
-        <p>***Like Cockatoos - U2B4</p>
+        <p>***Like Cockatoos - </p>
         """,
         lyrics_full_html="""
         <p>2x main chords - no guitar</p>
@@ -105,6 +105,7 @@ SONGS = {
         <p>And he was standing, At the corner<br>
         Where the road /turned dark<br>
         """,
+        use_full=True
     ),
     "Mint Car": Song(
         title="Mint Car",

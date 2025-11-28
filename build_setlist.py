@@ -195,14 +195,41 @@ def build_song_section(song):
 
 
 def build_html(setlist_titles):
+    """
+    Build the HTML output consisting of:
+    1. Songs in the setlist, in order
+    2. A separator line
+    3. All remaining songs NOT in the setlist, alphabetized,
+       each rendered with full song details (title, notes, lyrics).
+    """
     sections = []
+
+    # 1) Songs that ARE in the setlist
     for title in setlist_titles:
         if title not in SONGS:
-            # This should not happen if resolve_titles_with_user did its job,
-            # but we keep this as a safety.
+            # Should not happen if resolve_titles_with_user was run
             raise ValueError(f"Song not found in library after resolution: '{title}'")
         sections.append(build_song_section(SONGS[title]))
-    return HTML_TEMPLATE.format(body="\n\n".join(sections))
+
+    # 2) Separator line
+    sections.append(
+        """
+<div class="song">
+  <h1 class="title">------NOT INCLUDED------</h1>
+</div>
+""".strip()
+    )
+
+    # 3) Songs NOT in the setlist (alphabetized)
+    included_set = set(setlist_titles)
+    leftovers = sorted([name for name in SONGS.keys() if name not in included_set])
+
+    for title in leftovers:
+        sections.append(build_song_section(SONGS[title]))
+
+    # Final document
+    body = "\n\n".join(sections)
+    return HTML_TEMPLATE.format(body=body)
 
 
 def make_output_filename(prefix: str = "setlist") -> str:
