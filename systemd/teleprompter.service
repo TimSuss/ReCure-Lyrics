@@ -6,3 +6,5 @@ LATEST=$(ls -t /home/tim-r/projects/ReCure-Lyrics/output/*.html | head -n 1); \
 '
 Environment=XDG_RUNTIME_DIR=/run/user/%U
 Restart=on-failure
+
+
