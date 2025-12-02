@@ -1,0 +1,10 @@
+[Unit]
+Description=Footswitch pedal service
+After=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/tim-r/pedals.py
+Restart=always
+
+[Install]
+WantedBy=default.target
