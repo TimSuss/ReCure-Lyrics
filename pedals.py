@@ -23,16 +23,16 @@ diagnostic_mode = False
 # Helper functions
 # ------------------------------
 def keypress(scancode):
-    run(["ydotool", "key", scancode])
+    run(["wtype", "-k", scancode])
 
 def page_down():
-    keypress("0xFF56")
+    keypress("PAGEDOWN")
 
 def slow_scroll():
-    keypress("0xFF54")   # Down arrow
+    keypress("DOWN")
 
 def jump_to_top():
-    keypress("0xFF50")   # Home
+    keypress("HOME")
 
 def enter_diagnostic():
     global diagnostic_mode
