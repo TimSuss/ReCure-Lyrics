@@ -3,7 +3,7 @@ Description=Footswitch pedal service
 After=graphical-session.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/tim-r/pedals.py
+ExecStart=/usr/bin/python3 /home/tim-r/projects/ReCure-Lyrics/pedals.py
 Restart=always
 
 [Install]

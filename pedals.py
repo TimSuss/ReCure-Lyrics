@@ -3,27 +3,23 @@ from gpiozero import Button, LED
 from time import time, sleep
 from subprocess import run
 
-# ------------------------------
-# GPIO Setup
-# ------------------------------
+# GPIO pins
 btnA = Button(17, pull_up=True)
 btnB = Button(27, pull_up=True)
 
 ledA = LED(22)
 ledB = LED(23)
 
-# ------------------------------
-# Timing state
-# ------------------------------
+# State
 A_down_time = None
 B_down_time = None
 diagnostic_mode = False
+last_combo_time = 0
 
-# ------------------------------
-# Helper functions
-# ------------------------------
-def keypress(scancode):
-    run(["wtype", "-k", scancode])
+# ------------- Key Helpers (Wayland safe) -----------------
+
+def keypress(keyname):
+    run(["wtype", "-k", keyname])
 
 def page_down():
     keypress("PAGEDOWN")
@@ -33,6 +29,11 @@ def slow_scroll():
 
 def jump_to_top():
     keypress("HOME")
+
+def send_tab():
+    keypress("TAB")
+
+# ------------- Diagnostic Mode ----------------------------
 
 def enter_diagnostic():
     global diagnostic_mode
@@ -46,9 +47,7 @@ def exit_diagnostic():
     ledB.off()
     print("Diagnostic mode OFF")
 
-# ------------------------------
-# Button event handlers
-# ------------------------------
+# ------------- Button Handlers ----------------------------
 
 def A_pressed():
     global A_down_time
@@ -59,12 +58,12 @@ def A_released():
 
     if diagnostic_mode:
         ledA.off()
+        A_down_time = None
         return
 
-    if A_down_time:
-        held = time() - A_down_time
-        if held < 0.5:  # short tap
-            page_down()
+    # Tap?
+    if A_down_time and (time() - A_down_time) < 0.4:
+        page_down()
 
     A_down_time = None
 
@@ -77,56 +76,41 @@ def B_released():
 
     if diagnostic_mode:
         ledB.off()
+        B_down_time = None
         return
 
-    if B_down_time:
-        held = time() - B_down_time
-        if held < 0.5:
-            slow_scroll()
+    # Tap?
+    if B_down_time and (time() - B_down_time) < 0.4:
+        slow_scroll()
 
     B_down_time = None
 
-# ------------------------------
-# Assign handlers
-# ------------------------------
 btnA.when_pressed = A_pressed
 btnA.when_released = A_released
 btnB.when_pressed = B_pressed
 btnB.when_released = B_released
 
-# ------------------------------
-# Main loop: detect holds + combos
-# ------------------------------
+# ------------- Main Loop ----------------------------------
+
 while True:
     now = time()
 
-    # Diagnostic mode (hold A 5 seconds)
-    if A_down_time and not diagnostic_mode:
-        if now - A_down_time >= 5:
+    # A hold 5 sec → diagnostic mode ON/OFF
+    if A_down_time:
+        if not diagnostic_mode and (now - A_down_time) >= 5:
             enter_diagnostic()
-
-    # Diagnostic mode exit (hold A 5 seconds again)
-    if A_down_time and diagnostic_mode:
-        if now - A_down_time >= 5:
+        elif diagnostic_mode and (now - A_down_time) >= 5:
             exit_diagnostic()
 
-    # Diagnostic LED behavior
+    # Briefly press both → TAB
+    if btnA.is_pressed and btnB.is_pressed:
+        if now - last_combo_time > 0.5:
+            send_tab()
+            last_combo_time = now
+
+    # Diagnostic LED mirrors
     if diagnostic_mode:
-        if btnA.is_pressed:
-            ledA.on()
-        else:
-            ledA.off()
-
-        if btnB.is_pressed:
-            ledB.on()
-        else:
-            ledB.off()
-
-    # Combo hold (A + B 3 seconds)
-    if A_down_time and B_down_time and not diagnostic_mode:
-        if now - A_down_time >= 3 and now - B_down_time >= 3:
-            jump_to_top()
-            A_down_time = None
-            B_down_time = None
+        ledA.on() if btnA.is_pressed else ledA.off()
+        ledB.on() if btnB.is_pressed else ledB.off()
 
     sleep(0.02)
