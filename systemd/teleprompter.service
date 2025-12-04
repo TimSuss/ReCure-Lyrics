@@ -1,8 +1,19 @@
+[Unit]
+Description=Auto-launch Netsurf teleprompter
+After=graphical-session.target
+
 [Service]
 Type=exec
 ExecStart=/bin/bash -c '\
-LATEST=$(ls -t /home/tim-r/projects/ReCure-Lyrics/output/*.html | head -n 1); \
-/usr/bin/netsurf-gtk "file://$LATEST" \
+    LATEST=$(ls -t /home/tim-r/projects/ReCure-Lyrics/output/*.html 2>/dev/null | head -n 1); \
+    if [ -z "$LATEST" ]; then \
+        echo "No HTML files found in output folder"; \
+        exit 1; \
+    fi; \
+    /usr/bin/netsurf-gtk "file://$LATEST" \
 '
 Environment=XDG_RUNTIME_DIR=/run/user/%U
 Restart=on-failure
+
+[Install]
+WantedBy=default.target
