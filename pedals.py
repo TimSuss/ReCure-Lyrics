@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 from gpiozero import Button, LED
 from time import time, sleep
-from subprocess import run
+from subprocess import run, Popen
 
 # GPIO pins
-btnA = Button(17, pull_up=True)
-btnB = Button(27, pull_up=True)
+btnA = Button(17, pull_up=True, bounce_time=0.05)
+btnB = Button(27, pull_up=True, bounce_time=0.05)
 
 ledA = LED(22)
 ledB = LED(23)
@@ -14,9 +14,14 @@ ledB = LED(23)
 A_down_time = None
 B_down_time = None
 diagnostic_mode = False
-last_combo_time = 0
 
-# ------------- Key Helpers (Wayland safe) -----------------
+# Debounce timing
+DEBOUNCE = 0.15
+
+# For TAB combo: hold A then tap B
+A_is_held_for_tab = False
+
+# ------------- Key Helpers -----------------
 
 def keypress(keyname):
     run(["wtype", "-k", keyname])
@@ -30,37 +35,74 @@ def page_down():
 def send_tab():
     keypress("Tab")
 
-# ------------- Diagnostic Mode ----------------------------
+# ------------- Diagnostic Mode -----------------
+
+diagnostic_process = None
 
 def enter_diagnostic():
-    global diagnostic_mode
+    global diagnostic_mode, diagnostic_process
+
     diagnostic_mode = True
+    ledA.on()
+    ledB.on()
     print("Diagnostic mode ON")
 
+    # Launch terminal window to print live states
+    diagnostic_process = Popen([
+        "lxterminal", "-e",
+        "bash -c 'watch -n 0.1 \"gpiozero-pinout; echo; "
+        "python3 - <<EOF\n"
+        "import gpiozero, time\n"
+        "A = gpiozero.Button(17, pull_up=True)\n"
+        "B = gpiozero.Button(27, pull_up=True)\n"
+        "while True:\n"
+        "    print(f\"A: {A.is_pressed}  B: {B.is_pressed}\")\n"
+        "    time.sleep(0.1)\n"
+        "EOF\"'"
+    ])
+
 def exit_diagnostic():
-    global diagnostic_mode
+    global diagnostic_mode, diagnostic_process
+
     diagnostic_mode = False
     ledA.off()
     ledB.off()
+
     print("Diagnostic mode OFF")
 
-# ------------- Button Handlers ----------------------------
+    if diagnostic_process:
+        diagnostic_process.terminate()
+        diagnostic_process = None
+
+    # Restart services
+    run(["systemctl", "--user", "restart", "teleprompter.service"])
+    run(["systemctl", "--user", "restart", "pedals.service"])
+
+# ------------- Button Handlers -----------------
 
 def A_pressed():
+    # Used only for measuring hold
     global A_down_time
     A_down_time = time()
 
 def A_released():
-    global A_down_time
+    global A_down_time, A_is_held_for_tab
 
     if diagnostic_mode:
         ledA.off()
-        A_down_time = None
         return
 
-    # Tap = PAGE UP
-    if A_down_time and (time() - A_down_time) < 0.4:
-        page_up()
+    # Debounce
+    if A_down_time and time() - A_down_time < DEBOUNCE:
+        return
+
+    # Check if A is being held for TAB combo
+    if A_down_time and (time() - A_down_time) > 0.4:
+        A_is_held_for_tab = True
+        return
+
+    # Normal PAGE UP action
+    page_up()
 
     A_down_time = None
 
@@ -69,16 +111,24 @@ def B_pressed():
     B_down_time = time()
 
 def B_released():
-    global B_down_time
+    global B_down_time, A_is_held_for_tab
 
     if diagnostic_mode:
         ledB.off()
-        B_down_time = None
         return
 
-    # Tap = PAGE DOWN
-    if B_down_time and (time() - B_down_time) < 0.4:
-        page_down()
+    # Debounce
+    if B_down_time and time() - B_down_time < DEBOUNCE:
+        return
+
+    # TAB combo: A is held, B is tapped
+    if A_is_held_for_tab:
+        send_tab()
+        A_is_held_for_tab = False
+        return
+
+    # Normal PAGE DOWN
+    page_down()
 
     B_down_time = None
 
@@ -87,28 +137,19 @@ btnA.when_released = A_released
 btnB.when_pressed = B_pressed
 btnB.when_released = B_released
 
-# ------------- Main Loop ----------------------------------
+# ------------- Main Loop -----------------
 
 while True:
     now = time()
 
-    # A hold 5 sec → diagnostic mode toggle
-    if A_down_time:
-        if (now - A_down_time) >= 5:
-            if not diagnostic_mode:
-                enter_diagnostic()
-            else:
-                exit_diagnostic()
+    # Hold A 5 seconds → toggle diagnostic mode
+    if A_down_time and (now - A_down_time) >= 5:
+        if not diagnostic_mode:
+            enter_diagnostic()
+        else:
+            exit_diagnostic()
 
-    # Press both briefly → TAB
-    if btnA.is_pressed and btnB.is_pressed:
-        if now - last_combo_time > 0.5:
-            send_tab()
-            last_combo_time = now
-
-    # Diagnostic LED mirrors button state
-    if diagnostic_mode:
-        ledA.on() if btnA.is_pressed else ledA.off()
-        ledB.on() if btnB.is_pressed else ledB.off()
+        # Ensure this only triggers once
+        A_down_time = None
 
     sleep(0.02)

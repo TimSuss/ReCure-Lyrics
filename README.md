@@ -136,8 +136,11 @@ Internal pull-ups remove the need for resistors.
 # **9. Pedal Behavior (Updated / Cleaned)**
 
 ✔ **Button A (Tap)** → PAGE UP
+
 ✔ **Button B (Tap)** → PAGE DOWN
+
 ✔ **Both Buttons (Short press together)** → TAB (refocus browser)
+
 ✔ **Hold A for 5 seconds** → Toggle diagnostic mode
 
 ### Diagnostic Mode
