@@ -22,13 +22,13 @@ def keypress(keyname):
     run(["wtype", "-k", keyname])
 
 def page_up():
-    keypress("PAGEUP")
+    keypress("Page_Up")
 
 def page_down():
-    keypress("PAGEDOWN")
+    keypress("Page_Down")
 
 def send_tab():
-    keypress("TAB")
+    keypress("Tab")
 
 # ------------- Diagnostic Mode ----------------------------
 
