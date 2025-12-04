@@ -21,14 +21,11 @@ last_combo_time = 0
 def keypress(keyname):
     run(["wtype", "-k", keyname])
 
+def page_up():
+    keypress("PAGEUP")
+
 def page_down():
     keypress("PAGEDOWN")
-
-def slow_scroll():
-    keypress("DOWN")
-
-def jump_to_top():
-    keypress("HOME")
 
 def send_tab():
     keypress("TAB")
@@ -61,9 +58,9 @@ def A_released():
         A_down_time = None
         return
 
-    # Tap?
+    # Tap = PAGE UP
     if A_down_time and (time() - A_down_time) < 0.4:
-        page_down()
+        page_up()
 
     A_down_time = None
 
@@ -79,9 +76,9 @@ def B_released():
         B_down_time = None
         return
 
-    # Tap?
+    # Tap = PAGE DOWN
     if B_down_time and (time() - B_down_time) < 0.4:
-        slow_scroll()
+        page_down()
 
     B_down_time = None
 
@@ -95,20 +92,21 @@ btnB.when_released = B_released
 while True:
     now = time()
 
-    # A hold 5 sec → diagnostic mode ON/OFF
+    # A hold 5 sec → diagnostic mode toggle
     if A_down_time:
-        if not diagnostic_mode and (now - A_down_time) >= 5:
-            enter_diagnostic()
-        elif diagnostic_mode and (now - A_down_time) >= 5:
-            exit_diagnostic()
+        if (now - A_down_time) >= 5:
+            if not diagnostic_mode:
+                enter_diagnostic()
+            else:
+                exit_diagnostic()
 
-    # Briefly press both → TAB
+    # Press both briefly → TAB
     if btnA.is_pressed and btnB.is_pressed:
         if now - last_combo_time > 0.5:
             send_tab()
             last_combo_time = now
 
-    # Diagnostic LED mirrors
+    # Diagnostic LED mirrors button state
     if diagnostic_mode:
         ledA.on() if btnA.is_pressed else ledA.off()
         ledB.on() if btnB.is_pressed else ledB.off()

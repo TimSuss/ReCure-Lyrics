@@ -1,18 +1,46 @@
 [Unit]
 Description=Auto-launch Netsurf teleprompter
 After=graphical-session.target
+Wants=graphical-session.target
 
 [Service]
 Type=exec
-ExecStart=/bin/bash -c '\
-    LATEST=$(ls -t /home/tim-r/projects/ReCure-Lyrics/output/*.html 2>/dev/null | head -n 1); \
-    if [ -z "$LATEST" ]; then \
-        echo "No HTML files found in output folder"; \
-        exit 1; \
-    fi; \
-    /usr/bin/netsurf-gtk "file://$LATEST" \
-'
+Environment=DISPLAY=:0
 Environment=XDG_RUNTIME_DIR=/run/user/%U
+
+ExecStart=/bin/bash -c '\
+LATEST=$(ls -t "/home/tim-r/projects/ReCure-Lyrics/output/"*.html 2>/dev/null | head -n 1); \
+if [ -z "$LATEST" ]; then \
+    echo "No HTML files found in output folder"; \
+    exit 1; \
+fi; \
+\
+# Launch Netsurf under XWayland
+GDK_BACKEND=x11 /usr/bin/netsurf-gtk "file:///$LATEST" & \
+NS_PID=$!; \
+\
+# Wait for Netsurf window to appear
+tries=0; \
+while ! wmctrl -l | grep -q "NetSurf"; do \
+    sleep 0.2; \
+    tries=$((tries+1)); \
+    if [ "$tries" -gt 50 ]; then \
+        echo "Timeout waiting for Netsurf window"; \
+        break; \
+    fi; \
+done; \
+\
+# Triple fullscreen to defeat Wayfire resize timing
+wmctrl -r "NetSurf" -b add,fullscreen 2>/dev/null || true; \
+sleep 0.3; \
+wmctrl -r "NetSurf" -b add,fullscreen 2>/dev/null || true; \
+sleep 0.8; \
+wmctrl -r "NetSurf" -b add,fullscreen 2>/dev/null || true; \
+\
+# Keep service alive as long as Netsurf stays open
+wait $NS_PID \
+'
+
 Restart=on-failure
 
 [Install]
