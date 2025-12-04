@@ -1,141 +1,26 @@
 #!/usr/bin/python3
-from gpiozero import Button, LED
-from time import time, sleep
+from gpiozero import Button
 from subprocess import run
+from time import sleep
 
-# GPIO pins
-btnA = Button(17, pull_up=True, bounce_time=0.05)
-btnB = Button(27, pull_up=True, bounce_time=0.05)
+btnA = Button(17, pull_up=True)
+btnB = Button(27, pull_up=True)
 
-ledA = LED(22)
-ledB = LED(23)
-
-# State
-A_down_time = None
-B_down_time = None
-diagnostic_mode = False
-A_hold_for_tab = False
-
-SCROLL_MULTIPLIER = 10      # Number of arrow presses per pedal press
-DEBOUNCE_RELEASE = 0.12     # Minimum press time before triggering
-
-
-# ----------------- Key Helpers -----------------
-
-def keypress(keyname):
-    run(["wtype", "-k", keyname])
-
-def scroll_down():
-    for _ in range(SCROLL_MULTIPLIER):
-        keypress("Down")
-
-def scroll_up():
-    for _ in range(SCROLL_MULTIPLIER):
-        keypress("Up")
-
-def send_tab():
-    keypress("Tab")
-
-
-# ----------------- Diagnostic Mode -----------------
-
-def enter_diagnostic():
-    global diagnostic_mode
-    diagnostic_mode = True
-    print("\n===== DIAGNOSTIC MODE ON =====")
-    ledA.blink(on_time=0.2, off_time=0.2)
-    ledB.blink(on_time=0.2, off_time=0.2)
-
-def exit_diagnostic():
-    global diagnostic_mode
-    diagnostic_mode = False
-    ledA.off()
-    ledB.off()
-    print("\n===== EXITING DIAGNOSTIC MODE =====")
-
-    # restart services
-    run(["systemctl", "--user", "restart", "teleprompter.service"])
-    run(["systemctl", "--user", "restart", "pedals.service"])
-
-
-# ----------------- Button Handlers -----------------
-
-def A_pressed():
-    global A_down_time
-    A_down_time = time()
+def keypress(key):
+    print("Sending:", key)
+    run(["wtype", "-k", key])
 
 def A_released():
-    global A_down_time, A_hold_for_tab
-
-    if A_down_time is None:
-        return
-
-    held = time() - A_down_time
-
-    # Enter/exit diagnostic
-    if held >= 5:
-        if not diagnostic_mode:
-            enter_diagnostic()
-        else:
-            exit_diagnostic()
-        A_down_time = None
-        return
-
-    # Long hold = enable TAB combo mode
-    if held >= 0.4:
-        A_hold_for_tab = True
-        A_down_time = None
-        return
-
-    # Debounce short taps
-    if held < DEBOUNCE_RELEASE:
-        A_down_time = None
-        return
-
-    # Normal action
-    if not diagnostic_mode:
-        scroll_up()
-
-    A_down_time = None
-
-
-def B_pressed():
-    global B_down_time
-    B_down_time = time()
+    keypress("Down")
 
 def B_released():
-    global B_down_time, A_hold_for_tab
+    keypress("Up")
 
-    if B_down_time is None:
-        return
-
-    held = time() - B_down_time
-
-    if held < DEBOUNCE_RELEASE:
-        B_down_time = None
-        return
-
-    # TAB combo: A held, B tapped
-    if A_hold_for_tab:
-        send_tab()
-        A_hold_for_tab = False
-        B_down_time = None
-        return
-
-    # Normal scroll
-    if not diagnostic_mode:
-        scroll_down()
-
-    B_down_time = None
-
-
-btnA.when_pressed = A_pressed
 btnA.when_released = A_released
-btnB.when_pressed = B_pressed
 btnB.when_released = B_released
 
-
-# ----------------- Main Loop -----------------
+print("RUNNING SIMPLE TEST MODE")
+print("A = Down  |  B = Up")
 
 while True:
-    sleep(0.02)
+    sleep(0.05)
