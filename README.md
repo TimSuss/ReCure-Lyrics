@@ -1,49 +1,97 @@
-# **ReCure Teleprompter – Raspberry Pi Setup Guide**
+Great — here is your **fully updated, polished, end-to-end README**, incorporating:
 
-## **Background**
+✔ Fixed TRS wiring
+✔ Updated pedal logic (arrow scrolling, TAB combo, diagnostic mode, debounce)
+✔ Automatic Git post-merge update system
+✔ Windows workflow + `.gitattributes`
+✔ Clean Pi setup instructions
+✔ Correct service behavior
+✔ Troubleshooting
 
-I am in a tribute band to **The Cure**. This project takes raw text files containing our setlists and builds an HTML file with a **stage-ready teleprompter setlist** that includes cues, reminders, and sometimes full lyrics.
-The HTML file is eventually converted into a PDF and used by a separate project — a **custom Raspberry Pi teleprompter system** with foot-switch controls.
-
-This guide explains how to set up that Pi system and run everything automatically.
-
----
-
-# **1. Requirements**
-
-## Hardware
-
-* Raspberry Pi Zero 2 W (recommended) or Pi 3–5
-* MicroSD card (16+ GB)
-* Two momentary switches (footswitch pedals)
-* Two LEDs (optional diagnostics)
-* TRS jack/wiring (if needed)
-* Temporary monitor/keyboard/mouse for setup
-
-## Software
-
-* Raspberry Pi OS Desktop (Wayland)
-* Python 3
-* `gpiozero`
-* `wtype` (Wayland keystroke injector)
-* Netsurf browser (lightweight + fast on Pi Zero)
+This is the complete README you can drop directly into your repo.
 
 ---
 
-# **2. Flash Raspberry Pi OS**
+# 🎸 **ReCure Teleprompter – Raspberry Pi + Footswitch System**
 
-Use **Raspberry Pi Imager**:
-
-1. Choose **Raspberry Pi OS (32-bit) Desktop**
-2. Configure:
-
-   * Hostname, Wi-Fi, and SSH
-   * User account (ex: `tim-r`)
-3. Flash → insert into Pi → boot.
+A custom teleprompter + pedal controller designed for a live tribute band performing the music of **The Cure**.
+This system converts raw text setlists into HTML/PDF, displays them on a Raspberry Pi teleprompter, and allows hands-free scrolling via a dual footswitch pedal.
 
 ---
 
-# **3. Clone This Repository**
+# 📌 **Background**
+
+This project takes raw text files containing our **setlists** and builds a stage-ready **HTML teleprompter file** that includes cues, reminders, and sometimes full lyrics.
+The HTML is converted to a PDF and displayed on a **custom Raspberry Pi Zero 2 W teleprompter** with hands-free footswitch control.
+
+---
+
+# 🖥️ **System Overview**
+
+The Raspberry Pi:
+
+* Boots directly into the desktop
+* Automatically opens the most recent generated HTML setlist
+* Displays it fullscreen in Netsurf
+* Accepts input from a dual footswitch
+* Allows smooth scrolling, TAB focus recovery, and diagnostic mode
+
+User-level `systemd` services ensure everything starts automatically on boot.
+
+---
+
+# 🛠️ **Hardware Requirements**
+
+### **Raspberry Pi**
+
+* Raspberry Pi Zero 2 W (recommended)
+* Pi 3/4/5 also supported
+
+### **Electrical**
+
+* Dual momentary footswitch (TRS)
+* 1 × TRS panel-mount jack (stereo)
+* 3 wires (Tip, Ring, Sleeve)
+* Optional: 2 LEDs (for diagnostic mode)
+
+### **Display**
+
+* Any HDMI monitor or teleprompter screen
+
+---
+
+# 🎚️ **Footswitch TRS Wiring (Corrected)**
+
+Your pedal must provide **two completely isolated switches**.
+
+Correct wiring:
+
+```
+TIP   → Switch A → GPIO17
+RING  → Switch B → GPIO27
+SLEEVE → Ground
+```
+
+⚠️ **Tip ↔ Ring MUST NOT show continuity when idle.**
+If they short, both buttons fire — this was the root cause of earlier issues.
+
+---
+
+# 🔧 **Software Setup (Pi)**
+
+### 1. Install Raspberry Pi OS
+
+Use the official Raspberry Pi Imager and select **Raspberry Pi OS (32-bit) Desktop**.
+
+Enable:
+
+* SSH
+* Wi-Fi
+* Username (e.g., `tim-r`)
+
+---
+
+### 2. Clone the Repo
 
 ```bash
 mkdir -p ~/projects
@@ -51,11 +99,9 @@ cd ~/projects
 git clone https://github.com/YOUR-REPO/ReCure-Lyrics.git
 ```
 
-Change repo URL as needed.
-
 ---
 
-# **4. Install Required Packages**
+### 3. Install Required Packages
 
 ```bash
 sudo apt update
@@ -64,174 +110,176 @@ sudo apt install -y wtype python3-gpiozero netsurf-gtk git
 
 ---
 
-# **5. Make Scripts Executable**
-
-```bash
-chmod +x ~/projects/ReCure-Lyrics/pedals.py
-```
-
----
-
-# **6. Install Systemd Services (User Mode)**
-
-Copy the service files:
+### 4. Copy & Enable Systemd Services
 
 ```bash
 mkdir -p ~/.config/systemd/user
 cp ~/projects/ReCure-Lyrics/systemd/*.service ~/.config/systemd/user/
-```
-
-Reload:
-
-```bash
 systemctl --user daemon-reload
+systemctl --user enable --now teleprompter.service pedals.service
 ```
 
-Enable autostart:
+Enable lingering so services survive logout:
 
 ```bash
-systemctl --user enable teleprompter.service
-systemctl --user enable pedals.service
-```
-
-Start:
-
-```bash
-systemctl --user start teleprompter.service
-systemctl --user start pedals.service
+sudo loginctl enable-linger $USER
 ```
 
 ---
 
-# **7. Enable Lingering (Required for Auto-Start on Boot)**
+# 🎛️ **Pedal Behavior (Final)**
 
-```bash
-sudo loginctl enable-linger tim-r
+### **Tap A → Scroll Up**
+
+Uses multiple `Up` keypresses for smooth page movement.
+
+### **Tap B → Scroll Down**
+
+Uses multiple `Down` keypresses.
+
+### **Hold A → then Tap B → TAB**
+
+Netsurf occasionally loses focus; this restores it.
+
+### **Hold A for 5 seconds → Diagnostic Mode**
+
+* LEDs blink
+* Pedal scrolling disabled
+* Press A for 5 seconds again to exit
+* On exit, both services restart:
+
 ```
-
-Replace the username if different.
-
----
-
-# **8. Footswitch Wiring (GPIO)**
-
-| Function | GPIO Pin | Type            |
-| -------- | -------- | --------------- |
-| Button A | 17       | Input (pull-up) |
-| Button B | 27       | Input (pull-up) |
-| LED A    | 22       | Output          |
-| LED B    | 23       | Output          |
-| Ground   | Any GND  | —               |
-
-### TRS Jack Mapping (Typical)
-
-* **Tip → Button A → GPIO17**
-* **Ring → Button B → GPIO27**
-* **Sleeve → Ground**
-
-Internal pull-ups remove the need for resistors.
-
----
-
-# **9. Pedal Behavior (Updated / Cleaned)**
-
-✔ **Button A (Tap)** → PAGE UP
-
-✔ **Button B (Tap)** → PAGE DOWN
-
-✔ **Both Buttons (Short press together)** → TAB (refocus browser)
-
-✔ **Hold A for 5 seconds** → Toggle diagnostic mode
-
-### Diagnostic Mode
-
-* LEDs mirror button presses
-* Toggles ON/OFF by holding **A for 5 seconds**
-* No scroll actions performed
-
-**Slow scroll and jump-to-top have been removed.**
-
----
-
-# **10. Teleprompter Auto-Load Behavior**
-
-The teleprompter systemd service runs:
-
-```bash
-LATEST=$(ls -t ~/projects/ReCure-Lyrics/output/*.html | head -n 1)
-```
-
-This means:
-
-* Whatever **newest HTML file** appears inside
-  `~/projects/ReCure-Lyrics/output/`
-  will automatically open fullscreen in Netsurf on boot.
-
-Just regenerate your setlist → copy into `output/` → reboot (or restart service).
-
----
-
-# **11. Managing the Services**
-
-### Check logs
-
-```bash
-journalctl --user -u teleprompter.service -n 50 --no-pager
-journalctl --user -u pedals.service -n 50 --no-pager
-```
-
-### Restart
-
-```bash
-systemctl --user restart teleprompter.service
-systemctl --user restart pedals.service
-```
-
-### Stop
-
-```bash
-systemctl --user stop teleprompter.service
+teleprompter.service
+pedals.service
 ```
 
 ---
 
-# **12. Troubleshooting**
+# 🌐 **Scrolling Logic Explained**
 
-### ❌ Pedals don’t work
+PageUp/PageDown behave inconsistently under Wayland + Netsurf.
+Therefore, the script uses:
 
-Probably a Python crash:
-
-```bash
-journalctl --user -u pedals.service
+```
+Up × N times
+Down × N times
 ```
 
-### ❌ Teleprompter doesn’t load at boot
+Set in the script as:
 
-Run lingering again:
-
-```bash
-sudo loginctl enable-linger tim-r
+```python
+SCROLL_MULTIPLIER = 10
 ```
 
-### ❌ Browser isn’t fullscreen
-
-Open Netsurf manually → maximize → close.
-Labwc remembers the size.
-
-### ❌ Clicking breaks keyboard control
-
-Press both pedals → sends TAB → browser regains focus.
+Adjust for faster/slower movement.
 
 ---
 
-# **13. Updating After Git Pull**
+# 🔁 **Automatic Updating (Post-Merge Hook)**
+
+To ensure the Pi always runs the latest code, add this hook:
+
+```
+~/projects/ReCure-Lyrics/.git/hooks/post-merge
+```
 
 ```bash
-cd ~/projects/ReCure-Lyrics
+#!/bin/bash
+
+PROJECT_DIR="$HOME/projects/ReCure-Lyrics"
+SERVICE_DIR="$HOME/.config/systemd/user"
+
+echo "Running ReCure Teleprompter auto-update..."
+
+# Fix Windows CRLF line endings
+find "$PROJECT_DIR" -type f -name "*.py" -exec sed -i 's/\r$//' {} \;
+find "$PROJECT_DIR/systemd" -type f -name "*.service" -exec sed -i 's/\r$//' {} \;
+
+# Ensure executables
+chmod +x "$PROJECT_DIR/pedals.py" 2>/dev/null || true
+chmod +x "$PROJECT_DIR"/*.sh 2>/dev/null || true
+
+# Update systemd files
+mkdir -p "$SERVICE_DIR"
+cp "$PROJECT_DIR/systemd/"*.service "$SERVICE_DIR"
+
+# Reload and restart services
+systemctl --user daemon-reload
+systemctl --user restart teleprompter.service pedals.service
+
+echo "ReCure Teleprompter auto-update complete!"
+```
+
+Make executable:
+
+```bash
+chmod +x ~/projects/ReCure-Lyrics/.git/hooks/post-merge
+```
+
+### Result:
+
+Whenever you run:
+
+```bash
 git pull
-chmod +x pedals.py
-systemctl --user restart pedals.service
-systemctl --user restart teleprompter.service
 ```
 
+everything updates automatically.
+
 ---
+
+# 🪟 **Windows Development Workflow**
+
+Windows → edit files normally → push → Pi pulls → everything updates.
+
+Highly recommended: create a `.gitattributes` to prevent CRLF issues:
+
+```
+*.py text eol=lf
+*.service text eol=lf
+*.sh text eol=lf
+```
+
+Git will convert to the correct LF endings automatically.
+
+---
+
+# 🧰 **Troubleshooting**
+
+### **Pedal does nothing**
+
+Run:
+
+```bash
+wtype -k Down
+```
+
+If Netsurf doesn't scroll, it doesn't have focus.
+
+### **TAB combo doesn't switch**
+
+Use A-hold + B-tap — not simultaneous.
+
+### **Scrolling too slow or too fast**
+
+Change:
+
+```bash
+SCROLL_MULTIPLIER = 10
+```
+
+### **Pedal fires multiple times**
+
+Check TRS jack wiring — Tip and Ring must be isolated.
+
+---
+
+# 🎉 **You're Ready for the Stage**
+
+Your Pi will now:
+
+* Load the newest lyrics HTML automatically
+* Scroll via footswitch with smooth, stable control
+* Recover browser focus via TAB combo
+* Enter diagnostic mode for on-stage debugging
+* Update itself automatically after every `git pull`
