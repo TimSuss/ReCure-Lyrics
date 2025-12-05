@@ -19,6 +19,14 @@ A_hold_for_tab = False
 SCROLL_MULTIPLIER = 10      # Number of arrow presses per pedal press
 DEBOUNCE_RELEASE = 0.12     # Minimum press time before triggering
 
+import sys
+
+LOG_PATH = "/home/tim-r/pedal.log"
+
+def log(msg):
+    with open(LOG_PATH, "a") as f:
+        f.write(msg + "\n")
+
 
 # ----------------- Key Helpers -----------------
 
@@ -26,12 +34,12 @@ def keypress(keyname):
     run(["wtype", "-k", keyname])
 
 def scroll_down():
-    print("Scroll DOWN triggered")
+    log("Scroll DOWN triggered")
     for _ in range(SCROLL_MULTIPLIER):
         run(["wtype", "-k", "Down"])
 
 def scroll_up():
-    print("Scroll UP triggered")
+    log("Scroll UP triggered")
     for _ in range(SCROLL_MULTIPLIER):
         run(["wtype", "-k", "Up"])
 
@@ -65,6 +73,7 @@ def exit_diagnostic():
 def A_pressed():
     global A_down_time
     A_down_time = time()
+    log("A pressed")
 
 def A_released():
     global A_down_time, A_hold_for_tab
@@ -100,10 +109,14 @@ def A_released():
 
     A_down_time = None
 
+    ...
+    log(f"A released (held {held:.3f}s)")
+    ...
 
 def B_pressed():
     global B_down_time
     B_down_time = time()
+    log("B pressed")
 
 def B_released():
     global B_down_time, A_hold_for_tab
@@ -129,7 +142,7 @@ def B_released():
         scroll_down()
 
     B_down_time = None
-
+    log(f"B released (held {held:.3f}s)")
 
 btnA.when_pressed = A_pressed
 btnA.when_released = A_released
