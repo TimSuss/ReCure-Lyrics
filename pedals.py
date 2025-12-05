@@ -26,12 +26,14 @@ def keypress(keyname):
     run(["wtype", "-k", keyname])
 
 def scroll_down():
+    print("Scroll DOWN triggered")
     for _ in range(SCROLL_MULTIPLIER):
-        keypress("Down")
+        run(["wtype", "-k", "Down"])
 
 def scroll_up():
+    print("Scroll UP triggered")
     for _ in range(SCROLL_MULTIPLIER):
-        keypress("Up")
+        run(["wtype", "-k", "Up"])
 
 def send_tab():
     keypress("Tab")
