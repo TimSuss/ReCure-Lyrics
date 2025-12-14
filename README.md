@@ -1,16 +1,4 @@
-Great — here is your **fully updated, polished, end-to-end README**, incorporating:
 
-✔ Fixed TRS wiring
-✔ Updated pedal logic (arrow scrolling, TAB combo, diagnostic mode, debounce)
-✔ Automatic Git post-merge update system
-✔ Windows workflow + `.gitattributes`
-✔ Clean Pi setup instructions
-✔ Correct service behavior
-✔ Troubleshooting
-
-This is the complete README you can drop directly into your repo.
-
----
 
 # 🎸 **ReCure Teleprompter – Raspberry Pi + Footswitch System**
 
