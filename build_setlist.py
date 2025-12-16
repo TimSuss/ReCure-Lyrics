@@ -20,25 +20,49 @@ HTML_TEMPLATE = """<!doctype html>
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 18pt;
     line-height: 1.4;
-    color: #000;
-    background: #ffffff;
+    color: #e0e0e0;
+    background: #1a1a1a;
     margin: 0;
-    padding: 16px;
+    padding: 0;
+    overflow: hidden;
+    height: 100vh;
+  }}
+
+  #book-container {{
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }}
+
+  .page {{
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 2px solid #333;
+    box-sizing: border-box;
+  }}
+
+  .page:last-child {{
+    border-right: none;
   }}
 
   .song {{
     margin-bottom: 1.5em;
+    break-inside: avoid;
   }}
 
   h1.title {{
     font-size: 26pt;
     margin: 0 0 0.2em 0;
     font-weight: 700;
+    color: #f0f0f0;
   }}
 
   .notes {{
     font-size: 12pt;
-    color: #555;
+    color: #999;
     margin-bottom: 0.4em;
   }}
 
@@ -67,9 +91,50 @@ HTML_TEMPLATE = """<!doctype html>
     }}
   }}
 </style>
+<script>
+  let currentPage = 0;
+
+  function handleKeyPress(event) {{
+    const pages = document.querySelectorAll('.page');
+
+    if (event.key === 'ArrowDown') {{
+      event.preventDefault();
+      // Turn page forward - right page becomes left page
+      if (currentPage + 2 < pages.length) {{
+        currentPage += 2;
+        updatePages();
+      }}
+    }} else if (event.key === 'ArrowUp') {{
+      event.preventDefault();
+      // Turn page backward
+      if (currentPage - 2 >= 0) {{
+        currentPage -= 2;
+        updatePages();
+      }}
+    }}
+  }}
+
+  function updatePages() {{
+    const pages = document.querySelectorAll('.page');
+    pages.forEach((page, index) => {{
+      if (index === currentPage || index === currentPage + 1) {{
+        page.style.display = 'block';
+      }} else {{
+        page.style.display = 'none';
+      }}
+    }});
+  }}
+
+  document.addEventListener('DOMContentLoaded', function() {{
+    updatePages();
+    document.addEventListener('keydown', handleKeyPress);
+  }});
+</script>
 </head>
 <body>
+<div id="book-container">
 {body}
+</div>
 </body>
 </html>
 """
@@ -186,10 +251,12 @@ def build_song_section(song):
         lyrics = ""
 
     return f"""
-<div class="song">
-  <h1 class="title">{song.title}</h1>
-  <div class="notes">{song.notes_html}</div>
-  <div class="lyrics">{lyrics}</div>
+<div class="page">
+  <div class="song">
+    <h1 class="title">{song.title}</h1>
+    <div class="notes">{song.notes_html}</div>
+    <div class="lyrics">{lyrics}</div>
+  </div>
 </div>
 """.strip()
 
@@ -214,8 +281,10 @@ def build_html(setlist_titles):
     # 2) Separator line
     sections.append(
         """
-<div class="song">
-  <h1 class="title">------NOT INCLUDED------</h1>
+<div class="page">
+  <div class="song">
+    <h1 class="title">------NOT INCLUDED------</h1>
+  </div>
 </div>
 """.strip()
     )

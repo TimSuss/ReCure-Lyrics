@@ -16,7 +16,6 @@ B_down_time = None
 diagnostic_mode = False
 A_hold_for_tab = False
 
-SCROLL_MULTIPLIER = 3      # Number of arrow presses per pedal press
 DEBOUNCE_RELEASE = 0.12     # Minimum press time before triggering
 
 
@@ -26,12 +25,12 @@ def keypress(keyname):
     run(["wtype", "-k", keyname])
 
 def scroll_down():
-    for _ in range(SCROLL_MULTIPLIER):
-        keypress("Down")
+    # Single keypress to turn page (right page becomes left page)
+    keypress("Down")
 
 def scroll_up():
-    for _ in range(SCROLL_MULTIPLIER):
-        keypress("Up")
+    # Single keypress to turn page backward
+    keypress("Up")
 
 def send_tab():
     keypress("Tab")
