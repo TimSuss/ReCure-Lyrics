@@ -1,8 +1,15 @@
 # build_setlist.py
 import os
 from datetime import date
-import difflib          # ← add this
+import difflib
 from songs import SONGS
+
+try:
+    from weasyprint import HTML
+    WEASYPRINT_AVAILABLE = True
+except ImportError:
+    WEASYPRINT_AVAILABLE = False
+    print("Warning: weasyprint not installed. Install with: pip install weasyprint")
 
 SETLIST_FILE = os.path.join("input", "setlist.txt")
 
@@ -16,125 +23,59 @@ HTML_TEMPLATE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <style>
+  /* CSS Paged Media - for PDF generation */
+  @page {{
+    size: A4 landscape;
+    margin: 15mm;
+    background: #1a1a1a;
+  }}
+
   body {{
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 18pt;
-    line-height: 1.4;
+    font-size: 16pt;
+    line-height: 1.5;
     color: #e0e0e0;
     background: #1a1a1a;
     margin: 0;
     padding: 0;
-    overflow: hidden;
-    height: 100vh;
-  }}
-
-  #book-container {{
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-  }}
-
-  .page {{
-    flex: 1;
-    padding: 32px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-right: 2px solid #333;
-    box-sizing: border-box;
-  }}
-
-  .page:last-child {{
-    border-right: none;
   }}
 
   .song {{
-    margin-bottom: 1.5em;
+    margin-bottom: 2em;
+    page-break-inside: avoid;
     break-inside: avoid;
+    orphans: 3;
+    widows: 3;
   }}
 
   h1.title {{
-    font-size: 26pt;
-    margin: 0 0 0.2em 0;
+    font-size: 22pt;
+    margin: 0 0 0.3em 0;
     font-weight: 700;
     color: #f0f0f0;
+    page-break-after: avoid;
+    break-after: avoid;
   }}
 
   .notes {{
-    font-size: 12pt;
+    font-size: 11pt;
     color: #999;
-    margin-bottom: 0.4em;
+    margin-bottom: 0.5em;
+    page-break-after: avoid;
+    break-after: avoid;
   }}
 
   .lyrics {{
-    font-size: 18pt;
+    font-size: 16pt;
   }}
 
-  p {{
-    margin: 0 0 0.2em 0;
-  }}
-
-  @media print {{
-    @page {{
-      margin: 10mm !important;
-    }}
-    body {{
-      margin: 0 !important;
-      padding: 0 !important;
-    }}
-    .song {{
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }}
-    p {{
-      margin: 0 0 0.25em 0 !important;
-    }}
+  .lyrics p {{
+    margin: 0 0 0.3em 0;
   }}
 </style>
-<script>
-  let currentPage = 0;
-
-  function handleKeyPress(event) {{
-    const pages = document.querySelectorAll('.page');
-
-    if (event.key === 'ArrowDown') {{
-      event.preventDefault();
-      // Turn page forward - right page becomes left page
-      if (currentPage + 2 < pages.length) {{
-        currentPage += 2;
-        updatePages();
-      }}
-    }} else if (event.key === 'ArrowUp') {{
-      event.preventDefault();
-      // Turn page backward
-      if (currentPage - 2 >= 0) {{
-        currentPage -= 2;
-        updatePages();
-      }}
-    }}
-  }}
-
-  function updatePages() {{
-    const pages = document.querySelectorAll('.page');
-    pages.forEach((page, index) => {{
-      if (index === currentPage || index === currentPage + 1) {{
-        page.style.display = 'block';
-      }} else {{
-        page.style.display = 'none';
-      }}
-    }});
-  }}
-
-  document.addEventListener('DOMContentLoaded', function() {{
-    updatePages();
-    document.addEventListener('keydown', handleKeyPress);
-  }});
-</script>
 </head>
 <body>
-<div id="book-container">
 {body}
-</div>
 </body>
 </html>
 """
@@ -251,12 +192,10 @@ def build_song_section(song):
         lyrics = ""
 
     return f"""
-<div class="page">
-  <div class="song">
-    <h1 class="title">{song.title}</h1>
-    <div class="notes">{song.notes_html}</div>
-    <div class="lyrics">{lyrics}</div>
-  </div>
+<div class="song">
+  <h1 class="title">{song.title}</h1>
+  <div class="notes">{song.notes_html}</div>
+  <div class="lyrics">{lyrics}</div>
 </div>
 """.strip()
 
@@ -281,10 +220,8 @@ def build_html(setlist_titles):
     # 2) Separator line
     sections.append(
         """
-<div class="page">
-  <div class="song">
-    <h1 class="title">------NOT INCLUDED------</h1>
-  </div>
+<div class="song">
+  <h1 class="title">------NOT INCLUDED------</h1>
 </div>
 """.strip()
     )
@@ -332,8 +269,17 @@ if __name__ == "__main__":
     html = build_html(titles)
 
     # 4) Write out the dated HTML file
-    output_file = make_output_filename()
-    with open(output_file, "w", encoding="utf-8") as f:
+    html_file = make_output_filename()
+    with open(html_file, "w", encoding="utf-8") as f:
         f.write(html)
+    print(f"Wrote {html_file}")
 
-    print(f"Wrote {output_file}. Open it in a browser and print to PDF.")
+    # 5) Generate PDF from HTML
+    if WEASYPRINT_AVAILABLE:
+        pdf_file = html_file.replace('.html', '.pdf')
+        print(f"Generating PDF: {pdf_file}")
+        HTML(string=html).write_pdf(pdf_file)
+        print(f"PDF generated successfully: {pdf_file}")
+    else:
+        print("Skipping PDF generation (weasyprint not installed)")
+        print("Install with: pip install weasyprint")

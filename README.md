@@ -3,14 +3,14 @@
 # 🎸 **ReCure Teleprompter – Raspberry Pi + Footswitch System**
 
 A custom teleprompter + pedal controller designed for a live tribute band performing the music of **The Cure**.
-This system converts raw text setlists into HTML/PDF, displays them on a Raspberry Pi teleprompter, and allows hands-free scrolling via a dual footswitch pedal.
+This system converts raw text setlists into styled PDFs, displays them on a Raspberry Pi teleprompter with a two-page book view, and allows hands-free page-turning via a dual footswitch pedal.
 
 ---
 
 # 📌 **Background**
 
-This project takes raw text files containing our **setlists** and builds a stage-ready **HTML teleprompter file** that includes cues, reminders, and sometimes full lyrics.
-The HTML is converted to a PDF and displayed on a **custom Raspberry Pi Zero 2 W teleprompter** with hands-free footswitch control.
+This project takes raw text files containing our **setlists** and builds a stage-ready **PDF teleprompter file** that includes cues, reminders, and sometimes full lyrics.
+The PDF is displayed on a **custom Raspberry Pi Zero 2 W teleprompter** in a two-page side-by-side view (like an open book) with dark mode styling and hands-free footswitch control for page-turning.
 
 ---
 
@@ -19,10 +19,10 @@ The HTML is converted to a PDF and displayed on a **custom Raspberry Pi Zero 2 W
 The Raspberry Pi:
 
 * Boots directly into the desktop
-* Automatically opens the most recent generated HTML setlist
-* Displays it fullscreen in Netsurf
+* Automatically opens the most recent generated PDF setlist
+* Displays it fullscreen in Zathura PDF viewer with two-page spread mode (dark background)
 * Accepts input from a dual footswitch
-* Allows smooth scrolling, TAB focus recovery, and diagnostic mode
+* Allows page-turning (each press turns to the next two-page spread), TAB focus recovery, and diagnostic mode
 
 User-level `systemd` services ensure everything starts automatically on boot.
 
@@ -93,8 +93,16 @@ git clone https://github.com/YOUR-REPO/ReCure-Lyrics.git
 
 ```bash
 sudo apt update
-sudo apt install -y wtype python3-gpiozero netsurf-gtk git
+sudo apt install -y wtype python3-gpiozero zathura git python3-pip
+pip3 install weasyprint
 ```
+
+**Package Details:**
+- `wtype`: Sends keypresses to applications (for pedal control)
+- `python3-gpiozero`: GPIO control library for footswitch
+- `zathura`: Lightweight PDF viewer (replaces Netsurf)
+- `weasyprint`: Python library for converting HTML to PDF
+- `git`: Version control
 
 ---
 
@@ -115,19 +123,19 @@ sudo loginctl enable-linger $USER
 
 ---
 
-# 🎛️ **Pedal Behavior (Final)**
+# 🎛️ **Pedal Behavior**
 
-### **Tap A → Scroll Up**
+### **Tap A → Page Up**
 
-Uses multiple `Up` keypresses for smooth page movement.
+Turns to the previous two-page spread (like flipping a book backward).
 
-### **Tap B → Scroll Down**
+### **Tap B → Page Down**
 
-Uses multiple `Down` keypresses.
+Turns to the next two-page spread (the right page becomes the left page, new content appears on the right).
 
 ### **Hold A → then Tap B → TAB**
 
-Netsurf occasionally loses focus; this restores it.
+Zathura occasionally loses focus; this restores it.
 
 ### **Hold A for 5 seconds → Diagnostic Mode**
 
@@ -143,23 +151,25 @@ pedals.service
 
 ---
 
-# 🌐 **Scrolling Logic Explained**
+# 📖 **PDF Page-Turning Logic**
 
-PageUp/PageDown behave inconsistently under Wayland + Netsurf.
-Therefore, the script uses:
+The system uses Zathura's two-page spread mode (activated with the `d` key on startup).
 
+**How it works:**
+1. PDF is generated with automatic pagination (songs flow across multiple pages as needed)
+2. Zathura displays pages in two-page spread mode (like an open book)
+3. Each pedal press sends a single `Page_Down` or `Page_Up` keypress
+4. The display shifts by one two-page spread (right page becomes left page)
+
+**Visual Example:**
 ```
-Up × N times
-Down × N times
+Initial view:     After Page Down:
+┌─────┬─────┐    ┌─────┬─────┐
+│ P1  │ P2  │ →  │ P2  │ P3  │
+└─────┴─────┘    └─────┴─────┘
 ```
 
-Set in the script as:
-
-```python
-SCROLL_MULTIPLIER = 10
-```
-
-Adjust for faster/slower movement.
+This creates a natural "book-turning" experience optimized for live performance.
 
 ---
 

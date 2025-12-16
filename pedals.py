@@ -25,12 +25,12 @@ def keypress(keyname):
     run(["wtype", "-k", keyname])
 
 def scroll_down():
-    # Single keypress to turn page (right page becomes left page)
-    keypress("Down")
+    # Page down in Zathura - turns to next two-page spread
+    keypress("Page_Down")
 
 def scroll_up():
-    # Single keypress to turn page backward
-    keypress("Up")
+    # Page up in Zathura - turns to previous two-page spread
+    keypress("Page_Up")
 
 def send_tab():
     keypress("Tab")
