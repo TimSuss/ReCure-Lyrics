@@ -4,10 +4,12 @@ After=graphical-session.target
 Wants=graphical-session.target
 
 [Service]
-Type=exec
+Type=simple
 Environment=DISPLAY=:0
+Environment=WAYLAND_DISPLAY=wayland-0
 Environment=XDG_RUNTIME_DIR=/run/user/%U
 
+ExecStartPre=/bin/sleep 5
 ExecStart=/bin/bash -c '\
 LATEST=$(ls -t "/home/tim-r/projects/ReCure-Lyrics/output/"*.pdf 2>/dev/null | head -n 1); \
 if [ -z "$LATEST" ]; then \
@@ -15,14 +17,10 @@ if [ -z "$LATEST" ]; then \
     exit 1; \
 fi; \
 \
-# Launch Zathura in fullscreen single-page mode
-# --mode fullscreen: start in fullscreen
-# --page 1: start on first page
-/usr/bin/zathura --mode fullscreen --page 1 "$LATEST" & \
-ZATHURA_PID=$!; \
+echo "Launching Zathura with: $LATEST"; \
 \
-# Keep service alive as long as Zathura stays open
-wait $ZATHURA_PID \
+# Launch Zathura in fullscreen single-page mode
+/usr/bin/zathura --mode fullscreen --page 1 "$LATEST" \
 '
 
 Restart=on-failure
