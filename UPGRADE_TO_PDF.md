@@ -58,13 +58,20 @@ When you press the pedal to "turn the page":
 ### 1. Install New Dependencies
 
 ```bash
-# Install Zathura PDF viewer
+# Install Zathura and WeasyPrint dependencies
 sudo apt update
-sudo apt install -y zathura python3-pip
+sudo apt install -y zathura git \
+  python3-pip python3-cffi python3-brotli \
+  libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
 
-# Install WeasyPrint for PDF generation
-pip3 install weasyprint
+# Install WeasyPrint (needed for PDF generation on the Pi)
+pip3 install weasyprint --break-system-packages
 ```
+
+**Note on --break-system-packages:** This flag is required on modern Raspberry Pi OS. It's safe because:
+- WeasyPrint only runs during the build process
+- Doesn't conflict with system packages
+- Alternative: Build PDFs on Windows and just copy them to the Pi
 
 ### 2. Update Service Files
 
@@ -131,17 +138,21 @@ This will:
 
 ### WeasyPrint Installation Issues
 
-If `pip3 install weasyprint` fails, try:
+**Option 1: Install with --break-system-packages (recommended)**
 
 ```bash
-# Install system dependencies first
-sudo apt install -y python3-dev python3-pip python3-setuptools \
-  python3-wheel python3-cffi libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
-  libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
-
-# Then install weasyprint
-pip3 install weasyprint
+sudo apt install -y python3-pip python3-cffi python3-brotli \
+  libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
+pip3 install weasyprint --break-system-packages
 ```
+
+**Option 2: Build PDFs on Windows only (easier)**
+
+If WeasyPrint installation on the Pi is problematic:
+1. Build PDFs on your Windows machine: `python build_setlist.py`
+2. Commit and push the generated PDF to git
+3. Pull on the Pi - no WeasyPrint needed!
+4. The teleprompter service will use the pre-built PDF
 
 ### Zathura Not Finding PDF Files
 

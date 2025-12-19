@@ -93,16 +93,26 @@ git clone https://github.com/YOUR-REPO/ReCure-Lyrics.git
 
 ```bash
 sudo apt update
-sudo apt install -y wtype python3-gpiozero zathura git python3-pip
-pip3 install weasyprint
+sudo apt install -y wtype python3-gpiozero zathura git \
+  python3-pip python3-cffi python3-brotli \
+  libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
+
+# Install WeasyPrint with --break-system-packages (safe for this use case)
+pip3 install weasyprint --break-system-packages
 ```
 
 **Package Details:**
 - `wtype`: Sends keypresses to applications (for pedal control)
 - `python3-gpiozero`: GPIO control library for footswitch
 - `zathura`: Lightweight PDF viewer (replaces Netsurf)
-- `weasyprint`: Python library for converting HTML to PDF
+- `weasyprint`: Python library for converting HTML to PDF (installed via pip)
 - `git`: Version control
+- System dependencies for WeasyPrint: `libpango`, `libharfbuzz`, etc.
+
+**Note on --break-system-packages:** This flag is needed on modern Raspberry Pi OS. It's safe here because:
+1. WeasyPrint only runs during build (not on the Pi runtime)
+2. It doesn't conflict with system packages
+3. You'll build PDFs on Windows primarily
 
 ---
 

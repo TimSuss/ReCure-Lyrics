@@ -4,12 +4,14 @@ from datetime import date
 import difflib
 from songs import SONGS
 
+import sys
+import platform
+
 try:
     from weasyprint import HTML
     WEASYPRINT_AVAILABLE = True
 except ImportError:
     WEASYPRINT_AVAILABLE = False
-    print("Warning: weasyprint not installed. Install with: pip install weasyprint")
 
 SETLIST_FILE = os.path.join("input", "setlist.txt")
 
@@ -278,8 +280,32 @@ if __name__ == "__main__":
     if WEASYPRINT_AVAILABLE:
         pdf_file = html_file.replace('.html', '.pdf')
         print(f"Generating PDF: {pdf_file}")
-        HTML(string=html).write_pdf(pdf_file)
-        print(f"PDF generated successfully: {pdf_file}")
+        try:
+            HTML(string=html).write_pdf(pdf_file)
+            print(f"✓ PDF generated successfully: {pdf_file}")
+        except Exception as e:
+            print(f"✗ PDF generation failed: {e}")
+            print("\nYou can manually generate the PDF:")
+            print(f"1. Open {html_file} in your browser")
+            print("2. Press Ctrl+P (Print)")
+            print("3. Select 'Save as PDF'")
+            print(f"4. Save as: {html_file.replace('.html', '.pdf')}")
     else:
-        print("Skipping PDF generation (weasyprint not installed)")
-        print("Install with: pip install weasyprint")
+        # On Windows, offer to open HTML in browser for manual PDF export
+        if platform.system() == 'Windows':
+            print("\n" + "="*60)
+            print("WeasyPrint not available on Windows.")
+            print("Opening HTML file in your browser for manual PDF export...")
+            print("="*60)
+            print("\nSteps to create PDF:")
+            print("1. Browser will open with the setlist")
+            print("2. Press Ctrl+P (or Cmd+P on Mac)")
+            print("3. Destination: 'Save as PDF'")
+            print("4. Save as: " + html_file.replace('.html', '.pdf'))
+            print("="*60 + "\n")
+
+            import webbrowser
+            webbrowser.open('file://' + os.path.abspath(html_file))
+        else:
+            print("\n✗ WeasyPrint not installed.")
+            print("Install with: pip3 install weasyprint --break-system-packages")
