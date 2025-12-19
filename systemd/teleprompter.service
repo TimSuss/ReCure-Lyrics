@@ -15,26 +15,11 @@ if [ -z "$LATEST" ]; then \
     exit 1; \
 fi; \
 \
-# Launch Zathura in fullscreen with two-page mode
+# Launch Zathura in fullscreen single-page mode
 # --mode fullscreen: start in fullscreen
 # --page 1: start on first page
 /usr/bin/zathura --mode fullscreen --page 1 "$LATEST" & \
 ZATHURA_PID=$!; \
-\
-# Wait for Zathura window to appear
-tries=0; \
-while ! wmctrl -l | grep -qi "zathura"; do \
-    sleep 0.2; \
-    tries=$((tries+1)); \
-    if [ "$tries" -gt 50 ]; then \
-        echo "Timeout waiting for Zathura window"; \
-        break; \
-    fi; \
-done; \
-\
-# Send keypress to enable two-page mode (d key in Zathura)
-sleep 0.5; \
-wtype -k d; \
 \
 # Keep service alive as long as Zathura stays open
 wait $ZATHURA_PID \
