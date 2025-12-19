@@ -27,8 +27,8 @@ HTML_TEMPLATE = """<!doctype html>
 <style>
   /* CSS Paged Media - for PDF generation */
   @page {{
-    size: A4 landscape;
-    margin: 15mm;
+    size: A4 portrait;
+    margin: 20mm;
     background: #1a1a1a;
   }}
 
