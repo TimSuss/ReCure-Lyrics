@@ -1,5 +1,6 @@
 # build_setlist.py
 import os
+import re
 from datetime import date
 import difflib
 from songs import SONGS
@@ -69,6 +70,12 @@ HTML_TEMPLATE = """<!doctype html>
 
   .lyrics {{
     font-size: 16pt;
+  }}
+
+  .lyrics,
+  .lyrics * {{
+    color: #e0e0e0 !important;
+    background: transparent !important;
   }}
 
   .lyrics p {{
@@ -193,6 +200,8 @@ def build_song_section(song):
     else:
         lyrics = ""
 
+    lyrics = sanitize_lyrics_html(lyrics)
+
     return f"""
 <div class="song">
   <h1 class="title">{song.title}</h1>
@@ -200,6 +209,25 @@ def build_song_section(song):
   <div class="lyrics">{lyrics}</div>
 </div>
 """.strip()
+
+
+def sanitize_lyrics_html(raw_html: str) -> str:
+    if not raw_html:
+        return raw_html
+
+    # Recover intended literal backslashes from escape sequences.
+    raw_html = raw_html.replace("\t", "\\t")
+    raw_html = raw_html.replace("\r", "\\r")
+    raw_html = raw_html.replace("\b", "\\b")
+    raw_html = raw_html.replace("\f", "\\f")
+
+    # Strip embedded document wrappers/styles from pasted HTML.
+    raw_html = re.sub(r"<style\b[^>]*>.*?</style>", "", raw_html, flags=re.IGNORECASE | re.DOTALL)
+    raw_html = re.sub(r"<head\b[^>]*>.*?</head>", "", raw_html, flags=re.IGNORECASE | re.DOTALL)
+    raw_html = re.sub(r"</?html\b[^>]*>", "", raw_html, flags=re.IGNORECASE)
+    raw_html = re.sub(r"</?body\b[^>]*>", "", raw_html, flags=re.IGNORECASE)
+
+    return raw_html.strip()
 
 
 def build_html(setlist_titles):
