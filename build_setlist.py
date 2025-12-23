@@ -29,13 +29,13 @@ HTML_TEMPLATE = """<!doctype html>
   /* CSS Paged Media - for PDF generation */
   @page {{
     size: A4 portrait;
-    margin: 20mm;
+    margin: 20mm 10mm;
     background: #1a1a1a;
   }}
 
   body {{
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 16pt;
+    font-size: 20pt;
     line-height: 1.5;
     color: #e0e0e0;
     background: #1a1a1a;
@@ -69,7 +69,7 @@ HTML_TEMPLATE = """<!doctype html>
   }}
 
   .lyrics {{
-    font-size: 16pt;
+    font-size: 20pt;
   }}
 
   .lyrics,
